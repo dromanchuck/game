@@ -1,0 +1,43 @@
+---
+description: TypeScript, naming, and Pixi.js coding standards for this game
+alwaysApply: true
+---
+
+# TypeScript and Pixi.js Standards
+
+You are an expert in TypeScript, Pixi.js, web games, and mobile optimization (Ionic Capacitor). Write concise, strongly typed, performance-first code. Follow official Pixi.js docs.
+
+## Style
+
+- Prefer functional and declarative patterns. Use classes only when Pixi requires them (e.g. extending `Container`, `Sprite`).
+- Keep modules small and single-purpose. Name factories with verbs: `createPlayer`, `updateGameState`.
+- Booleans use `is`, `has`, `should`: `isGameOver`, `hasRendered`, `shouldRespawn`.
+- Type every game object and Pixi display object. Avoid `any`.
+
+## Naming
+
+- camelCase: functions and variables (`createSprite`, `playerHealth`)
+- kebab-case: files (`game-scene.ts`, `player-component.ts`)
+- PascalCase: classes and Pixi objects (`PlayerSprite`, `GameScene`)
+- UPPER_SNAKE_CASE: constants (`MAX_PLAYERS`, `GRAVITY`)
+
+```typescript
+// ❌ BAD
+const Game_Scene.ts style names, `any` sprites, and class wrappers for plain data.
+
+// ✅ GOOD
+const MAX_HEALTH = 100;
+
+function createPlayer(texture: Texture): Sprite {
+  const sprite = new Sprite(texture);
+  sprite.label = 'PlayerSprite';
+  return sprite;
+}
+```
+
+## When suggesting code
+
+1. Analyze existing structure and performance cost (especially on mobile).
+2. Give a short step-by-step plan, then typed snippets.
+3. Explain why the approach is cheaper (draw calls, GC, memory).
+4. Call out Pixi gotchas (65k vertices, filter cost, texture swaps) and workarounds.

@@ -1,0 +1,37 @@
+---
+description: Feature folders, assets, state, storage, and test expectations
+alwaysApply: true
+---
+
+# Game Architecture
+
+Organize by feature, not by leftover type dumps. Typical top-level folders: `scenes/`, `entities/`, `systems/`, `assets/`.
+
+## Structure
+
+- Keep engine, scene management, and entity/systems as separate modules.
+- Centralize assets in one loader/service. Centralize storage (saves, settings) behind one API.
+- Put game config and physics numbers in one constants module. Use env vars for development, staging, and production.
+- Avoid ad-hoc globals. If shared state is needed, use one state system (Observer / Command / State as they fit).
+- Handle native plugins (audio, device) in one service.
+
+```typescript
+// ❌ BAD
+window.playerHp = 10;
+PIXI.Assets.load('hero.png'); // scattered loads
+
+// ✅ GOOD
+import { GAME } from './constants';
+import { assetService } from './assets/asset-service';
+import { storage } from './storage/storage';
+
+const texture = await assetService.loadTexture('hero');
+storage.set('settings', { sfxVolume: GAME.DEFAULT_SFX_VOLUME });
+```
+
+## Quality
+
+- Unit-test game logic and systems; integration-test scenes. Mock native/network APIs.
+- Profile on target devices. Add automated performance checks in CI to catch regressions.
+- Use global error handlers and a crash reporter in production.
+- Cross-device test (web + Capacitor). Watch browser-specific Pixi/WebGL quirks.

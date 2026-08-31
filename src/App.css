@@ -1,0 +1,117 @@
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.app__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app__header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app__hud {
+  margin: 0;
+  color: #9a8f7a;
+}
+
+.app__hud strong {
+  color: #7dffb3;
+  font-size: 1.2rem;
+}
+
+.app__stage {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 432px);
+  aspect-ratio: 1;
+  border: 3px solid #3d372c;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.app__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.app__canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  background: rgba(20, 18, 15, 0.82);
+}
+
+.overlay h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.overlay p {
+  margin: 0;
+  color: #9a8f7a;
+}
+
+.overlay__hint {
+  font-size: 0.85rem;
+}
+
+.overlay--tutorial {
+  inset: auto 0 0 0;
+  top: auto;
+  place-content: start center;
+  padding: 1rem 1.25rem 1.25rem;
+  text-align: center;
+  background: linear-gradient(
+    to top,
+    rgba(20, 18, 15, 0.96) 0%,
+    rgba(20, 18, 15, 0.78) 70%,
+    rgba(20, 18, 15, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.overlay__tag {
+  margin: 0;
+  color: #7dffb3;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.overlay--tutorial h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+}
+
+.overlay--tutorial p:last-child {
+  margin: 0;
+  color: #efe6d4;
+  font-size: 0.95rem;
+}
+
+.app__footer {
+  justify-self: center;
+  color: #9a8f7a;
+  font-size: 0.85rem;
+}

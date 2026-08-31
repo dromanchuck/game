@@ -1,0 +1,43 @@
+---
+description: Pixi.js rendering, pooling, and web/mobile performance rules
+alwaysApply: true
+---
+
+# Pixi.js Performance
+
+Optimize for smooth 60fps on web and Capacitor. Prefer WebGPU, fall back to WebGL. Drive the game loop with Pixi's ticker — do not roll a custom `requestAnimationFrame` loop.
+
+## Rendering
+
+- Batch sprites; nest containers only when the transform hierarchy needs it.
+- Use texture atlases to cut texture swaps. Use `ParticleContainer` for large sets of similar sprites.
+- Cull off-screen objects. Cache complex graphics. Be wary of filters (especially on mobile).
+- Use Pixi's interaction manager; do not attach raw DOM listeners to the canvas.
+- Stay under the ~65k vertices Graphics limit; split or use sprites/meshes when you would exceed it.
+
+```typescript
+// ❌ BAD — allocate and add children every tick
+app.ticker.add(() => {
+  const burst = new Sprite(texture);
+  world.addChild(burst);
+});
+
+// ✅ GOOD — pool, reuse, cull
+function spawnBullet(pool: Sprite[], texture: Texture): Sprite {
+  const bullet = pool.pop() ?? new Sprite(texture);
+  bullet.visible = true;
+  return bullet;
+}
+```
+
+## Runtime cost
+
+- Minimize allocations during gameplay to avoid GC pauses. Pool frequently created/destroyed objects and remove unused scene-graph nodes.
+- Stream or chunk large worlds. Lazy-load and prefetch critical assets; compress and serve lower-res textures on older devices.
+- Cache values reused across frames (bounds, lookups). Keep draw order simple.
+- Capacitor: optimize touch/gestures, responsive layout, asset size, and battery. Use `legacy: true` only for old devices. Centralize native plugins.
+
+## Shipping
+
+- Cache static assets on the CDN (Vercel/Cloudflare). Progressive-load so first interaction is fast.
+- Add a library only if it is maintained, typed, platform-compatible, and cheaper than in-house code. Profile before and after.
