@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { createGameApp } from './game/create-game-app';
-import type { GamePhase } from './logic/types';
 import {
   getTutorialStep,
+  type GamePhase,
   type TutorialStepId,
-} from './systems/tutorial-system';
+} from '@grid-bomb-dodge/game-core';
+
+import { createGameApp } from './game/create-game-app';
 
 import './App.css';
 

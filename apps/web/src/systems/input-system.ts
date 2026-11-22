@@ -1,4 +1,4 @@
-export type Direction = 'up' | 'down' | 'left' | 'right';
+import type { Direction } from '@grid-bomb-dodge/game-core';
 
 export interface InputSystem {
   consumeDirection: () => Direction | null;
@@ -58,22 +58,4 @@ export function createInputSystem(): InputSystem {
       window.removeEventListener('keydown', onKeyDown);
     },
   };
-}
-
-export function applyDirection(
-  x: number,
-  y: number,
-  direction: Direction,
-  gridSize: number,
-): { x: number; y: number } {
-  switch (direction) {
-    case 'up':
-      return { x, y: Math.max(0, y - 1) };
-    case 'down':
-      return { x, y: Math.min(gridSize - 1, y + 1) };
-    case 'left':
-      return { x: Math.max(0, x - 1), y };
-    case 'right':
-      return { x: Math.min(gridSize - 1, x + 1), y };
-  }
 }

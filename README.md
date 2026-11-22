@@ -8,15 +8,14 @@ Move on a 9x9 grid, read telegraphed bomb lanes, and survive as long as you can.
 
 ```bash
 npm install
-npm run dev
+npm run dev      # web, usually http://localhost:5173
+npm run mobile   # Expo dev server (scan the QR code with Expo Go)
 ```
-
-Open the URL shown in the terminal (usually `http://localhost:5173`).
 
 ## Controls
 
 - **Enter** — start / restart
-- **Arrow keys** — move one tile per press
+- **Arrow keys** (web) / **swipe** (mobile) — move one tile per press
 
 On your **first run**, a short in-game tutorial walks through movement, reading telegraphs, escaping, and scoring.
 
@@ -30,15 +29,21 @@ On your **first run**, a short in-game tutorial walks through movement, reading 
 
 ## Scripts
 
-- `npm run dev` — local dev server
-- `npm run build` — production build
-- `npm test` — unit tests for blast and spawn logic
-- `npm run preview` — preview production build
+- `npm run dev` — web dev server
+- `npm run build` — production web build
+- `npm run mobile` — Expo dev server for the mobile app
+- `npm test` — unit tests for game-core
+- `npm run typecheck` — typecheck all workspaces
+- `npm run lint` — oxlint
 
 ## Architecture
 
-- **React** — title screen, HUD, game-over overlay
-- **Pixi.js** — grid rendering, ticker-driven game loop, sprites
-- **Pure logic modules** — blast coverage, score, spawn tuning (Vitest)
+npm workspaces monorepo:
 
-Art is procedural pixel canvas textures (no external sprite pack required for the prototype).
+- `packages/game-core` — platform-agnostic TypeScript: constants, blast/score/grid logic, spawn/swarm/tutorial systems and `createGameEngine` (a headless simulation driven by `tick`, `move`, `start`, with injected `GameStorage`). Vitest tests live here.
+- `apps/web` — React UI + Pixi.js renderer, keyboard input, `localStorage`.
+- `apps/mobile` — Expo / React Native app with a Skia renderer, swipe input and AsyncStorage.
+
+Both apps only render `engine.getSnapshot()` and forward input, so gameplay changes go in `game-core` once.
+
+Web art is procedural pixel canvas textures; mobile draws the same look with Skia primitives.

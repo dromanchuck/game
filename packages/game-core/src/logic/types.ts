@@ -14,6 +14,8 @@ export interface Bomb {
   fuseTotal: number;
 }
 
+export type Direction = 'up' | 'down' | 'left' | 'right';
+
 export type GamePhase = 'title' | 'playing' | 'gameOver';
 
 export interface PlayerState {
