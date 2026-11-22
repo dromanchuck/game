@@ -1,6 +1,4 @@
 export const GRID_SIZE_MAX = 9;
-export const CELL_SIZE = 48;
-export const CANVAS_SIZE = GRID_SIZE_MAX * CELL_SIZE;
 
 /** Grid grows by one tile on each side once the score reaches `minScore`. */
 export const GRID_STAGES = [

@@ -1,6 +1,6 @@
 import { Texture } from 'pixi.js';
 
-import { CELL_SIZE } from '../constants';
+import { CELL_SIZE } from '../render-constants';
 
 export interface GameTextures {
   floor: Texture;

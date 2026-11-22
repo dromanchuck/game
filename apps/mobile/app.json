@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Grid Bomb Dodge",
+    "slug": "grid-bomb-dodge",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#14120f",
+    "ios": { "supportsTablet": false },
+    "android": { "backgroundColor": "#14120f" },
+    "plugins": ["expo-status-bar"]
+  }
+}

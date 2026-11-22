@@ -1,8 +1,9 @@
 import { Container, Sprite, Text } from 'pixi.js';
 
 import type { GameTextures } from '../assets/create-game-textures';
-import { CELL_SIZE, GRID_SIZE_MAX } from '../constants';
-import type { Bomb } from '../logic/types';
+import { GRID_SIZE_MAX, type Bomb } from '@grid-bomb-dodge/game-core';
+
+import { CELL_SIZE } from '../render-constants';
 
 export interface GridView {
   container: Container;
