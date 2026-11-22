@@ -4,6 +4,8 @@ import {
   getFuseDuration,
   getLiveBombCap,
   getSpawnIntervalMs,
+  getSwarmBombCount,
+  shouldSpawnSwarm,
 } from '../systems/spawn-system';
 
 describe('spawn system tuning', () => {
@@ -21,5 +23,12 @@ describe('spawn system tuning', () => {
   it('accelerates spawn interval with score', () => {
     expect(getSpawnIntervalMs(0)).toBe(2200);
     expect(getSpawnIntervalMs(10)).toBe(1000);
+  });
+
+  it('limits live bombs and disables swarms on small grids', () => {
+    expect(getLiveBombCap(30, 3)).toBe(1);
+    expect(getLiveBombCap(30, 5)).toBe(3);
+    expect(shouldSpawnSwarm(100, 600_000, 3)).toBe(false);
+    expect(getSwarmBombCount(5)).toBeLessThanOrEqual(4);
   });
 });

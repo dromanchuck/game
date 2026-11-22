@@ -3,10 +3,12 @@ import { Application, Container } from 'pixi.js';
 import { createGameTextures } from '../assets/create-game-textures';
 import {
   CANVAS_SIZE,
-  GRID_SIZE,
-  PLAYER_START,
+  CELL_SIZE,
+  GRID_GROW_ANIMATION_MS,
+  GRID_GROW_PAUSE_MS,
 } from '../constants';
 import { getBlastCells, getThreatenedCells } from '../logic/blast';
+import { getGridCenter, getGridSizeForScore } from '../logic/grid-size';
 import { incrementScore, updateBestScore } from '../logic/score';
 import type { Bomb, GamePhase, PlayerState } from '../logic/types';
 import { loadBestScore, saveBestScore } from '../storage/best-score';
@@ -93,7 +95,12 @@ export async function createGameApp(
 
   let input: InputSystem = createInputSystem();
   let phase: GamePhase = 'title';
-  let player: PlayerState = { ...PLAYER_START };
+  let gridSize = getGridSizeForScore(0);
+  let viewCells = gridSize;
+  let growFromCells = gridSize;
+  let growTimerMs = 0;
+  let growPauseMs = 0;
+  let player: PlayerState = getGridCenter(gridSize);
   let bombs: Bomb[] = [];
   let score = 0;
   let bestScore = loadBestScore();
@@ -105,6 +112,50 @@ export async function createGameApp(
   let tutorialStep: TutorialStepId = isTutorialRun ? 'move' : 'complete';
   let tutorialStepTimerMs = 0;
   let tutorialAwaitingExplosion = false;
+
+  // Keep the grid centered and fit `viewCells` tiles into the fixed canvas.
+  const applyWorldView = (): void => {
+    const scale = CANVAS_SIZE / (viewCells * CELL_SIZE);
+    world.scale.set(scale);
+    world.x = (CANVAS_SIZE - gridSize * CELL_SIZE * scale) / 2;
+    world.y = world.x;
+  };
+
+  const setInitialGridSize = (size: number): void => {
+    gridSize = size;
+    viewCells = size;
+    growFromCells = size;
+    growTimerMs = 0;
+    growPauseMs = 0;
+    grid.setGridSize(size);
+    applyWorldView();
+  };
+
+  const growGrid = (): void => {
+    const nextSize = getGridSizeForScore(score);
+    growFromCells = gridSize;
+    // Tiles are added on every side, so existing coordinates shift by the added ring.
+    const shift = (nextSize - gridSize) / 2;
+    player = { x: player.x + shift, y: player.y + shift };
+    gridSize = nextSize;
+    growTimerMs = GRID_GROW_ANIMATION_MS;
+    growPauseMs = GRID_GROW_PAUSE_MS;
+    spawnTimerMs = 0;
+    grid.setGridSize(gridSize);
+    setPlayerPosition(playerSprite, player.x, player.y);
+    applyWorldView();
+  };
+
+  const updateGridGrowth = (deltaMs: number): void => {
+    if (growTimerMs > 0) {
+      growTimerMs = Math.max(0, growTimerMs - deltaMs);
+      const t = 1 - growTimerMs / GRID_GROW_ANIMATION_MS;
+      const eased = 1 - (1 - t) * (1 - t);
+      viewCells = growFromCells + (gridSize - growFromCells) * eased;
+      applyWorldView();
+    }
+    if (growPauseMs > 0) growPauseMs = Math.max(0, growPauseMs - deltaMs);
+  };
 
   const emitTutorialStep = (): void => {
     callbacks.onTutorialStepChange(
@@ -122,7 +173,8 @@ export async function createGameApp(
   };
 
   const resetRun = (): void => {
-    player = { ...PLAYER_START };
+    setInitialGridSize(getGridSizeForScore(0));
+    player = getGridCenter(gridSize);
     bombs = [];
     score = 0;
     elapsedMs = 0;
@@ -161,14 +213,17 @@ export async function createGameApp(
   const plantBombs = (): void => {
     if (isTutorialRun) return;
 
-    const cap = getLiveBombCap(score);
+    const cap = getLiveBombCap(score, gridSize);
     const availableSlots = cap - bombs.length;
     if (availableSlots <= 0) return;
 
-    const plans = createSpawnPlan(score, elapsedMs, player.x, player.y).slice(
-      0,
-      availableSlots,
-    );
+    const plans = createSpawnPlan(
+      score,
+      elapsedMs,
+      player.x,
+      player.y,
+      gridSize,
+    ).slice(0, availableSlots);
     for (const plan of plans) {
       bombs.push(createBombFromPlan(plan));
     }
@@ -180,7 +235,7 @@ export async function createGameApp(
 
     const blastKeys = new Set<string>();
     for (const bomb of exploding) {
-      for (const cell of getBlastCells(bomb.type, bomb.x, bomb.y, GRID_SIZE)) {
+      for (const cell of getBlastCells(bomb.type, bomb.x, bomb.y, gridSize)) {
         blastKeys.add(`${cell.x},${cell.y}`);
       }
     }
@@ -215,7 +270,7 @@ export async function createGameApp(
   const advanceTutorialAfterMove = (): void => {
     if (tutorialStep === 'move') {
       tutorialStep = 'telegraph';
-      bombs = [createTutorialTelegraphBomb(player)];
+      bombs = [createTutorialTelegraphBomb(player, gridSize)];
       tutorialStepTimerMs = 0;
       emitTutorialStep();
       return;
@@ -279,15 +334,17 @@ export async function createGameApp(
     const direction = input.consumeDirection();
     const didMove = direction !== null;
     if (direction) {
-      player = applyDirection(player.x, player.y, direction, GRID_SIZE);
+      player = applyDirection(player.x, player.y, direction, gridSize);
       setPlayerPosition(playerSprite, player.x, player.y);
     }
 
     updateTutorial(deltaMs, didMove);
 
+    updateGridGrowth(deltaMs);
+
     if (!isTutorialRun) {
       elapsedMs += deltaMs;
-      spawnTimerMs += deltaMs;
+      if (growPauseMs <= 0) spawnTimerMs += deltaMs;
     }
 
     if (flashTimerMs > 0) {
@@ -304,7 +361,13 @@ export async function createGameApp(
     const died = resolveExplosions();
     if (died || phase !== 'playing') return;
 
-    if (!isTutorialRun) {
+    // Grow only once the board is clear, so no bomb is ever teleported or dropped.
+    const needsGrowth = getGridSizeForScore(score) > gridSize;
+    if (needsGrowth && bombs.length === 0 && growPauseMs <= 0) {
+      growGrid();
+    }
+
+    if (!isTutorialRun && !needsGrowth && growPauseMs <= 0) {
       const spawnInterval = getSpawnIntervalMs(score);
       while (spawnTimerMs >= spawnInterval) {
         spawnTimerMs -= spawnInterval;
@@ -312,11 +375,12 @@ export async function createGameApp(
       }
     }
 
-    const threatened = getThreatenedCells(bombs, GRID_SIZE);
+    const threatened = getThreatenedCells(bombs, gridSize);
     grid.setTelegraphCells(threatened);
     grid.setBombs(bombs);
   });
 
+  setInitialGridSize(gridSize);
   setPlayerPosition(playerSprite, player.x, player.y);
   callbacks.onBestScoreChange(bestScore);
   callbacks.onPhaseChange(phase);
