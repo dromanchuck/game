@@ -1,11 +1,12 @@
 import { Container, Sprite, Text } from 'pixi.js';
 
 import type { GameTextures } from '../assets/create-game-textures';
-import { CELL_SIZE, GRID_SIZE } from '../constants';
+import { CELL_SIZE, GRID_SIZE_MAX } from '../constants';
 import type { Bomb } from '../logic/types';
 
 export interface GridView {
   container: Container;
+  setGridSize: (size: number) => void;
   setTelegraphCells: (keys: ReadonlySet<string>) => void;
   setBombs: (bombs: ReadonlyArray<Bomb>) => void;
   flashExplosion: (keys: ReadonlySet<string>) => void;
@@ -23,13 +24,15 @@ export function createGrid(textures: GameTextures): GridView {
   const telegraphPool: Sprite[] = [];
   const bombSprites = new Map<number, { sprite: Sprite; label: Text }>();
   const flashPool: Sprite[] = [];
+  const floorTiles: Sprite[] = [];
 
-  for (let y = 0; y < GRID_SIZE; y += 1) {
-    for (let x = 0; x < GRID_SIZE; x += 1) {
+  for (let y = 0; y < GRID_SIZE_MAX; y += 1) {
+    for (let x = 0; x < GRID_SIZE_MAX; x += 1) {
       const tile = new Sprite(textures.floor);
       tile.x = x * CELL_SIZE;
       tile.y = y * CELL_SIZE;
       floorLayer.addChild(tile);
+      floorTiles.push(tile);
     }
   }
 
@@ -58,6 +61,13 @@ export function createGrid(textures: GameTextures): GridView {
 
   return {
     container,
+    setGridSize(size: number): void {
+      for (let y = 0; y < GRID_SIZE_MAX; y += 1) {
+        for (let x = 0; x < GRID_SIZE_MAX; x += 1) {
+          floorTiles[y * GRID_SIZE_MAX + x].visible = x < size && y < size;
+        }
+      }
+    },
     setTelegraphCells(keys: ReadonlySet<string>): void {
       releaseTelegraphs();
       for (const key of keys) {

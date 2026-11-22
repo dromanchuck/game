@@ -22,6 +22,9 @@ On your **first run**, a short in-game tutorial walks through movement, reading 
 
 ## Difficulty
 
+- The grid **grows with your score**: 3×3 → 5×5 (8 pts) → 7×7 (20) → 9×9 (35). Growth happens once the board is clear, with a short pause. Thresholds live in `GRID_STAGES` (`src/constants.ts`).
+- Live bomb cap scales with grid size; swarms appear from 5×5.
+
 - **Swarms** target your position and sweep rows until ~**92%** of the grid is red (7–9 bombs). With a full 9-bomb swarm the board can go **100%** — move early.
 - We use **92% as the default target** instead of always 100%: still brutal, but an occasional 1-tile gap keeps deaths feeling like near-misses rather than pure RNG.
 

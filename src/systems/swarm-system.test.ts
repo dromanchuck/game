@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { GRID_SIZE, SWARM_COVERAGE_TARGET } from '../constants';
+import { GRID_SIZE_MAX, SWARM_COVERAGE_TARGET } from '../constants';
 import { getThreatenedCells } from '../logic/blast';
 import {
   countSafeCells,
@@ -16,14 +16,14 @@ describe('targeted swarms', () => {
 
   it('covers at least the configured target with nine bombs', () => {
     const plans = createTargetedSwarmPlan(4, 4, 0, 9, SWARM_COVERAGE_TARGET);
-    const ratio = getCoverageRatio(getThreatenedCells(plans, GRID_SIZE), GRID_SIZE);
+    const ratio = getCoverageRatio(getThreatenedCells(plans, GRID_SIZE_MAX), GRID_SIZE_MAX);
 
     expect(ratio).toBeGreaterThanOrEqual(SWARM_COVERAGE_TARGET);
-    expect(countSafeCells(plans, GRID_SIZE)).toBeLessThanOrEqual(7);
+    expect(countSafeCells(plans, GRID_SIZE_MAX)).toBeLessThanOrEqual(7);
   });
 
   it('can fully blanket the grid with nine row sweeps', () => {
     const plans = createTargetedSwarmPlan(4, 4, 0, 9, 1);
-    expect(countSafeCells(plans, GRID_SIZE)).toBe(0);
+    expect(countSafeCells(plans, GRID_SIZE_MAX)).toBe(0);
   });
 });

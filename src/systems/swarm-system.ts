@@ -1,5 +1,5 @@
 import {
-  GRID_SIZE,
+  GRID_SIZE_MAX,
   SWARM_COVERAGE_TARGET,
 } from '../constants';
 import { cellKey, getBlastCells, getThreatenedCells } from '../logic/blast';
@@ -9,7 +9,7 @@ import { getFuseDuration } from './spawn-system';
 
 export function getCoverageRatio(
   threatened: ReadonlySet<string>,
-  gridSize: number = GRID_SIZE,
+  gridSize: number = GRID_SIZE_MAX,
 ): number {
   return threatened.size / (gridSize * gridSize);
 }
@@ -77,7 +77,7 @@ export function createTargetedSwarmPlan(
   score: number,
   maxBombs: number,
   coverageTarget: number = SWARM_COVERAGE_TARGET,
-  gridSize: number = GRID_SIZE,
+  gridSize: number = GRID_SIZE_MAX,
 ): SpawnPlan[] {
   const fuseTotal = getFuseDuration(score);
   const plans: SpawnPlan[] = [];
@@ -109,7 +109,7 @@ export function createTargetedSwarmPlan(
 
 export function countSafeCells(
   plans: ReadonlyArray<{ type: BombType; x: number; y: number }>,
-  gridSize: number = GRID_SIZE,
+  gridSize: number = GRID_SIZE_MAX,
 ): number {
   const threatened = getThreatenedCells(plans, gridSize);
   let safe = 0;
@@ -121,6 +121,6 @@ export function countSafeCells(
   return safe;
 }
 
-export function getBlastCellsForPlan(plan: SpawnPlan, gridSize: number = GRID_SIZE) {
+export function getBlastCellsForPlan(plan: SpawnPlan, gridSize: number = GRID_SIZE_MAX) {
   return getBlastCells(plan.type, plan.x, plan.y, gridSize);
 }

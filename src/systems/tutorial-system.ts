@@ -1,4 +1,4 @@
-import { GRID_SIZE, TUTORIAL_FUSE_SECONDS } from '../constants';
+import { TUTORIAL_FUSE_SECONDS } from '../constants';
 import type { Bomb, PlayerState } from '../logic/types';
 import type { SpawnPlan } from './spawn-system';
 
@@ -58,8 +58,11 @@ export function createTutorialBomb(plan: SpawnPlan): Bomb {
   };
 }
 
-export function createTutorialTelegraphBomb(player: PlayerState): Bomb {
-  const laneY = (player.y + 2) % GRID_SIZE;
+export function createTutorialTelegraphBomb(
+  player: PlayerState,
+  gridSize: number,
+): Bomb {
+  const laneY = (player.y + 2) % gridSize;
   return createTutorialBomb({
     type: 'row',
     x: 0,

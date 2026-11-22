@@ -1,6 +1,18 @@
-export const GRID_SIZE = 9;
+export const GRID_SIZE_MAX = 9;
 export const CELL_SIZE = 48;
-export const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
+export const CANVAS_SIZE = GRID_SIZE_MAX * CELL_SIZE;
+
+/** Grid grows by one tile on each side once the score reaches `minScore`. */
+export const GRID_STAGES = [
+  { minScore: 0, size: 3 },
+  { minScore: 8, size: 5 },
+  { minScore: 20, size: 7 },
+  { minScore: 35, size: GRID_SIZE_MAX },
+] as const;
+
+export const GRID_GROW_PAUSE_MS = 700;
+export const GRID_GROW_ANIMATION_MS = 450;
+export const SWARM_MIN_GRID_SIZE = 5;
 
 export const FUSE_BASE_SECONDS = 2.0;
 export const FUSE_MIN_SECONDS = 1.4;
@@ -27,9 +39,5 @@ export const SWARM_COVERAGE_TARGET = 0.92;
 export const TUTORIAL_FUSE_SECONDS = 4;
 export const TUTORIAL_COMPLETE_KEY = 'grid-bomb-dodge-tutorial-complete';
 
-export const PLAYER_START = {
-  x: Math.floor(GRID_SIZE / 2),
-  y: Math.floor(GRID_SIZE / 2),
-} as const;
 
 export const BEST_SCORE_KEY = 'grid-bomb-dodge-best';
